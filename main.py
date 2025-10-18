@@ -16,8 +16,10 @@ async def main():
     
     print(f'✅ Found {len(listings)} listings:',end='\n')
 
-    for idx, listing in enumerate(listings):
-        print(f"{idx:02}. {listing['address']} — {listing['price']} — {listing['beds']}")
+    for idx, listing in enumerate(listings, start=1):
+        print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths",end='\n')
+
+
 
 if __name__ == "__main__":
     asyncio.run(main())

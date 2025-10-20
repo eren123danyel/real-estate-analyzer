@@ -8,10 +8,40 @@ from core.parser import parse_redfin_property
 from core.scraper import get_starting_url
 from ai.utils import extract_tool_output, extract_locations
 
+
 # Load API key
 os.environ["OPENAI_API_KEY"] = dotenv_values(".env")["OPENAI_API_KEY"]
+mcp_instance = None  # Global MCP server instance
 
-async def run_redfin_scraper(user_criteria: dict, start_url: str):
+async def get_mcp_server():
+    """
+    Initialize and return a running Playwright MCP server context manager.
+    Use this in an async with block.
+    """
+    global mcp_instance
+    if mcp_instance is None:
+        print("🚀 Launching global MCP server...")
+        mcp_instance = MCPServerStdio(
+            name="Playwright",
+            params={
+                "command": "npx",
+                "args": ["@playwright/mcp@latest"],
+                "launchOptions": {"headless": False}
+            },
+            cache_tools_list=False,
+            client_session_timeout_seconds=120
+        )
+        await mcp_instance.__aenter__()  # Start it once
+    return mcp_instance
+
+async def shutdown_mcp():
+    global mcp_instance
+    if mcp_instance:
+        print("🧹 Shutting down MCP server...")
+        await mcp_instance.__aexit__(None, None, None)
+        mcp_instance = None
+
+async def run_redfin_scraper(user_criteria: str, start_url: str):
     """
     Main function to scrape Redfin based on user criteria.
     
@@ -20,18 +50,10 @@ async def run_redfin_scraper(user_criteria: dict, start_url: str):
         start_url: Starting Redfin URL
     """
 
-    # Start the Playwright MCP server
-    async with MCPServerStdio(
-        name="Playwright",
-        params={
-            "command": "npx",
-            "args": ["@playwright/mcp@latest"],
-            "launchOptions": {"headless": False}
-        },
-        cache_tools_list=False,
-        client_session_timeout_seconds=120
-    ) as mcp:
 
+    mcp = await get_mcp_server()
+
+    try:
         # Navigation Agent - handles initial page load and filtering
         navigator = Agent(
             name="NavigatorAgent",
@@ -63,15 +85,13 @@ async def run_redfin_scraper(user_criteria: dict, start_url: str):
         trace_id = gen_trace_id()
         print(f"🔍 Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}", end="\n")
 
-        with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):
-            
-            print("🏠 REDFIN PROPERTY SCRAPER",end="\n")
+        with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):            
             print(f"📋 Search Criteria:", user_criteria, end="\n")
             print(f"🌐 Starting URL: {start_url}", end="\n")
             
             # Phase 1: Navigate and apply filters
-            print("Phase 1: Navigating and applying filters...")
-            print("-" * 60)
+            print("Phase 1: Navigating and applying filters...", end="\n")
+            print("-" * 60, end="\n")
             
             nav_result = await Runner.run(
                 starting_agent=navigator,
@@ -84,6 +104,8 @@ async def run_redfin_scraper(user_criteria: dict, start_url: str):
             # Check if filters were applied
             if "FILTERS_APPLIED" not in nav_result.final_output:
                 print("⚠️ Warning: Filters may not have been fully applied. Continuing anyway...")
+            print("Phase 2: Scraping property listings...", end="\n")
+            print("-" * 60, end="\n")
 
             # Phase 2: Get HTML and scrape property listings
             html_result = await mcp.call_tool("browser_evaluate", {
@@ -98,6 +120,12 @@ async def run_redfin_scraper(user_criteria: dict, start_url: str):
             properties = parse_redfin_property(html)
 
             return properties
+    except Exception as e:
+        print(f"⚠️  Scraper error: {e}", end="\n")
+        raise e
+    finally:
+        await shutdown_mcp()
+
             
 if __name__ == "__main__":
     user_goal = input("Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA'): ").strip()

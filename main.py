@@ -13,7 +13,7 @@ async def main():
 🏠 Real Estate Rent Analyzer
                 
 Pick from the following options:
-1. Scrape Redfin for property listings (w/ AI)
+1. Scrape Redfin for property listings (w/o AI)
 2. Scrape Redfin for properties with AI and Playwright MCP
 
 Enter option (1 or 2) >""").strip()
@@ -55,13 +55,19 @@ Enter option (1 or 2) >""").strip()
             print("❌ Could not extract location from the goal. Please specify a valid location.",end='\n')
             return
         
-        start_url = asyncio.run(get_starting_url(location[0]))
-        properties = asyncio.run(run_redfin_scraper(user_goal, start_url))
+        try:
+            start_url = await get_starting_url(location[0])
+        except Exception as e:
+            print(f"❌ Failed to get starting URL: {e}", end="\n")
+            print("Please ensure the location is valid and try again.", end="\n")
+            return
+
+        properties = await run_redfin_scraper(user_goal, start_url)
 
         if not properties:
             print("❌ No properties found matching the criteria.", end="\n")
         else:
-            print(f"✅ Scraped {len(properties)} properties matching criteria.", end="\n")
+            print(f"✅ Found {len(properties)} properties matching criteria.", end="\n")
             for idx, listing in enumerate(properties, start=1):
                 print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}")
 

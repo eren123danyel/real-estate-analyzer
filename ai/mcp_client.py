@@ -7,6 +7,8 @@ from agents.mcp import MCPServerStdio
 from core.parser import parse_redfin_property
 from core.scraper import get_starting_url
 from ai.utils import extract_tool_output, extract_locations
+import atexit
+import signal
 
 
 # Load API key
@@ -18,6 +20,15 @@ async def get_mcp_server():
     Initialize and return a running Playwright MCP server context manager.
     Use this in an async with block.
     """
+
+    
+    userAgent = (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+    )
+    
+
     global mcp_instance
     if mcp_instance is None:
         print("🚀 Launching global MCP server...")
@@ -25,8 +36,12 @@ async def get_mcp_server():
             name="Playwright",
             params={
                 "command": "npx",
-                "args": ["@playwright/mcp@latest"],
-                "launchOptions": {"headless": False}
+                "args": [
+                    "@playwright/mcp@latest",
+                    "--headless",
+                    "--viewport-size", "1280,800",
+                    "--user-agent", userAgent
+                    ],
             },
             cache_tools_list=False,
             client_session_timeout_seconds=120
@@ -40,6 +55,11 @@ async def shutdown_mcp():
         print("🧹 Shutting down MCP server...")
         await mcp_instance.__aexit__(None, None, None)
         mcp_instance = None
+
+# Register shutdown on normal exit and on SIGINT/SIGTERM
+atexit.register(lambda: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
+signal.signal(signal.SIGINT, lambda sig, frame: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
+signal.signal(signal.SIGTERM, lambda sig, frame: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
 
 async def run_redfin_scraper(user_criteria: str, start_url: str):
     """
@@ -123,8 +143,6 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
     except Exception as e:
         print(f"⚠️  Scraper error: {e}", end="\n")
         raise e
-    finally:
-        await shutdown_mcp()
 
             
 if __name__ == "__main__":

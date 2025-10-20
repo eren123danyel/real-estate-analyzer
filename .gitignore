@@ -1,1 +1,6 @@
 real-estate-analyzer.log
+.env
+__pycache__/
+.venv/*
+*.csv
+*.txt

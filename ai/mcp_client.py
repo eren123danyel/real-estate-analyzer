@@ -7,9 +7,6 @@ from agents.mcp import MCPServerStdio
 from core.parser import parse_redfin_property
 from core.scraper import get_starting_url
 from ai.utils import extract_tool_output, extract_locations
-import atexit
-import signal
-
 
 # Load API key
 os.environ["OPENAI_API_KEY"] = dotenv_values(".env")["OPENAI_API_KEY"]
@@ -31,7 +28,8 @@ async def get_mcp_server():
 
     global mcp_instance
     if mcp_instance is None:
-        print("🚀 Launching global MCP server...")
+        print("🚀 Launching global MCP server...", end="\n")
+
         mcp_instance = MCPServerStdio(
             name="Playwright",
             params={
@@ -47,6 +45,7 @@ async def get_mcp_server():
             client_session_timeout_seconds=120
         )
         await mcp_instance.__aenter__()  # Start it once
+        print("🏃 MCP server is running.",end="\n")
     return mcp_instance
 
 async def shutdown_mcp():
@@ -56,10 +55,6 @@ async def shutdown_mcp():
         await mcp_instance.__aexit__(None, None, None)
         mcp_instance = None
 
-# Register shutdown on normal exit and on SIGINT/SIGTERM
-atexit.register(lambda: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
-signal.signal(signal.SIGINT, lambda sig, frame: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
-signal.signal(signal.SIGTERM, lambda sig, frame: asyncio.get_event_loop().run_until_complete(shutdown_mcp()))
 
 async def run_redfin_scraper(user_criteria: str, start_url: str):
     """
@@ -143,11 +138,23 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
     except Exception as e:
         print(f"⚠️  Scraper error: {e}", end="\n")
         raise e
-
+async def run_scraper_with_shutdown(user_goal, start_url):
+        '''Ensure they are on the same thread'''
+        result = ""
+        try:
+            result = await run_redfin_scraper(user_goal, start_url)
+        except asyncio.CancelledError:
+            raise
+        finally:
+            await shutdown_mcp()
+            return result
             
 if __name__ == "__main__":
     user_goal = input("Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA'): ").strip()
     user_goal = user_goal if user_goal else "Collect all rental listings under $2500 with ≥2 beds and ≥1 bath in Seattle."
     location = extract_locations(user_goal)
     start_url = asyncio.run(get_starting_url(location[0]))
-    asyncio.run(run_redfin_scraper(user_goal, start_url))
+
+    
+
+    asyncio.run(run_scraper_with_shutdown(user_goal,start_url))

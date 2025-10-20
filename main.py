@@ -1,8 +1,9 @@
 import logging
 import asyncio
 from core.scraper import scrape_redfin
-from ai.mcp_client import run_redfin_scraper, get_starting_url
+from ai.mcp_client import run_scraper_with_shutdown, get_starting_url
 from ai.utils import extract_locations
+from dotenv import dotenv_values
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename="real-estate-analyzer.log",level=logging.INFO)
@@ -44,6 +45,10 @@ Enter option (1 or 2) >""").strip()
             print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}",end='\n')
 
     if menu == "2":
+        if not dotenv_values(".env")["OPENAI_API_KEY"]:
+            print("❌ OPENAI_API_KEY not set in .env file. Please set it to use AI-powered scraping.", end="\n")
+            return
+        
         user_goal = input("Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA with 2 bedrooms'): ").strip()
         
         while not user_goal:
@@ -62,7 +67,7 @@ Enter option (1 or 2) >""").strip()
             print("Please ensure the location is valid and try again.", end="\n")
             return
 
-        properties = await run_redfin_scraper(user_goal, start_url)
+        properties = await run_scraper_with_shutdown(user_goal, start_url)
 
         if not properties:
             print("❌ No properties found matching the criteria.", end="\n")

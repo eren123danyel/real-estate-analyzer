@@ -28,6 +28,7 @@ async def scrape_redfin(location: str, max_price: int | None = None):
         try:
             # Go to redfin homepage and wait for searchbar to load
             await page.goto("https://www.redfin.com/",timeout=60000)
+            await page.wait_for_load_state("networkidle")
             await page.wait_for_selector('input#search-box-input',timeout=10000)
 
             # Switch to "Rent" section
@@ -35,9 +36,12 @@ async def scrape_redfin(location: str, max_price: int | None = None):
 
             # Searh for the location
             search_box_placeholder = "City, Address, School, Building, ZIP"
-            await page.get_by_placeholder(search_box_placeholder).click()
+            await page.wait_for_selector('input#search-box-input',timeout=10000)
+            await page.get_by_placeholder(search_box_placeholder).click(timeout=10000)
             await page.get_by_placeholder(search_box_placeholder).fill(location)
             await page.keyboard.press("Enter")
+            await page.wait_for_load_state("networkidle")
+
             
             print(f"➡️  Navigated to search results page for {location}", end='\n')
 
@@ -78,6 +82,7 @@ async def get_starting_url(location: str):
         try:
             # Go to redfin homepage and wait for searchbar to load
             await page.goto("https://www.redfin.com/",timeout=60000)
+            await page.wait_for_load_state("networkidle")
             await page.wait_for_selector('input#search-box-input',timeout=10000)
 
             # Switch to "Rent" section
@@ -85,11 +90,13 @@ async def get_starting_url(location: str):
 
             # Searh for the location
             search_box_placeholder = "City, Address, School, Building, ZIP"
-            await page.get_by_placeholder(search_box_placeholder).click()
+            await page.wait_for_selector('input#search-box-input',timeout=10000)
+            await page.get_by_placeholder(search_box_placeholder).click(timeout=10000)
             await page.get_by_placeholder(search_box_placeholder).fill(location)
             await page.keyboard.press("Enter")
-            
-            # Wait for the properties to load so we know the URL is correct
+            await page.wait_for_load_state("networkidle")
+
+            # Wait for the listings to load to ensure we are on the correct page
             await page.wait_for_selector("div.HomeCardContainer",timeout=20000)
 
             # Get the current URL

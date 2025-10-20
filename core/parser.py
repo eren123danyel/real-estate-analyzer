@@ -31,6 +31,10 @@ def parse_redfin_property(html_content: str):
             sqft_element = card.select_one("span.bp-Homecard__Stats--sqft .bp-Homecard__LockedStat--value")
             sqft = sqft_element.get_text(strip=True) if sqft_element else "N/A"
 
+            # Link
+            link_element = card.select_one("a.bp-Homecard__Address")
+            link = "https://www.redfin.com" + link_element['href'] if link_element and 'href' in link_element.attrs else "N/A"
+
             # Only add the property if we found an address
             if address != "N/A":
                 property_info = {
@@ -39,7 +43,9 @@ def parse_redfin_property(html_content: str):
                     "beds": beds,
                     "baths": baths,
                     "sqft": sqft,
+                    "link": link,
                 }
+
                 properties.append(property_info)
 
     

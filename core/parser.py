@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-def parse_redfin_property(html_content: str):
+def parse_redfin_property(html_content: str, max_price: int | None = None):
     '''
     Extract property listings from a Redfin search results page.
     '''
@@ -14,6 +14,15 @@ def parse_redfin_property(html_content: str):
             # Price
             price_element = card.select_one("span.bp-Homecard__Price--value")
             price = price_element.get_text(strip=True) if price_element else "N/A"
+
+            # Filter by max_price if provided
+            if max_price and price != "N/A":
+                # Only keep digits from price string and convert to int
+                int_price = int("".join(filter(str.isdigit,price)))
+                
+                # Skip if price exceeds max_price
+                if int_price > max_price:
+                    continue
             
             # Address
             address_div = card.select_one("div.bp-Homecard__Address--address")

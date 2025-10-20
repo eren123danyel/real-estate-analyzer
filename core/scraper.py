@@ -3,7 +3,7 @@ from playwright.async_api import async_playwright
 from core.parser import parse_redfin_property
 
 
-async def scrape_redfin(location: str):
+async def scrape_redfin(location: str, max_price: int | None = None):
     '''
     Scrape redfin for real estate listings in the given location.
     '''
@@ -39,15 +39,15 @@ async def scrape_redfin(location: str):
             await page.get_by_placeholder(search_box_placeholder).fill(location)
             await page.keyboard.press("Enter")
             
-            print(f"➡️ Navigated to search results page for {location}",end='\n')
+            print(f"➡️  Navigated to search results page for {location}", end='\n')
 
             # Wait for the listings to load
             await page.wait_for_selector("div.HomeCardContainer",timeout=20000)
 
             # Get HTML content of the page
             html_content = await page.content()
-            properties = parse_redfin_property(html_content)
-            print(f"✅ Scraped {len(properties)} properties from Redfin",end='\n')
+            properties = parse_redfin_property(html_content, max_price)
+            print(f"✅ Scraped {len(properties)} properties from Redfin", end='\n')
 
         except Exception as e:
             print(f"⚠️ Scraper error: {e}",end='\n')

@@ -97,9 +97,7 @@ async def run_redfin_scraper(user_criteria: dict, start_url: str):
         
             properties = parse_redfin_property(html)
 
-            print(f"✅ Scraped {len(properties)} properties matching criteria.", end="\n")
-            for idx, prop in enumerate(properties, start=1):
-                print(f"{idx}. {prop['address']} - {prop['price']} - {prop['beds']} beds - {prop['baths']} baths - link: {prop['link']}")
+            return properties
             
 if __name__ == "__main__":
     user_goal = input("Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA'): ").strip()

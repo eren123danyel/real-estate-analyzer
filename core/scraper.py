@@ -50,7 +50,8 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             print(f"✅ Scraped {len(properties)} properties from Redfin", end='\n')
 
         except Exception as e:
-            print(f"⚠️ Scraper error: {e}",end='\n')
+            print(f"⚠️  Scraper error: {e}",end='\n')
+            raise e
 
         finally:
             await browser.close()
@@ -86,17 +87,19 @@ async def get_starting_url(location: str):
             search_box_placeholder = "City, Address, School, Building, ZIP"
             await page.get_by_placeholder(search_box_placeholder).click()
             await page.get_by_placeholder(search_box_placeholder).fill(location)
-
-            async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
-                await page.keyboard.press("Enter")
+            await page.keyboard.press("Enter")
             
+            # Wait for the properties to load so we know the URL is correct
+            await page.wait_for_selector("div.HomeCardContainer",timeout=20000)
+
             # Get the current URL
             url = page.url
 
            
 
         except Exception as e:
-            print(f"⚠️ Scraper error: {e}",end='\n')
+            print(f"⚠️  Scraper error: {e}",end='\n')
+            raise e
 
         finally:
             await browser.close()

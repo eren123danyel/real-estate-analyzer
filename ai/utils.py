@@ -2,12 +2,34 @@ import json
 import spacy
 
 nlp = spacy.load("en_core_web_sm")
+
+CITY_MAP = {
+    "la": "Los Angeles",
+    "nyc": "New York City",
+    "ny": "New York City",
+    "sf": "San Francisco",
+    "dc": "Washington D.C.",
+    "phx": "Phoenix",
+    "atl": "Atlanta",
+    "chi": "Chicago",
+    "vegas": "Las Vegas",
+    "sd": "San Diego",
+}
 def extract_locations(text: str):
     """
     Extracts location from the given string using spaCy NLP.
     """
     doc = nlp(text)
-    return [ent.text for ent in doc.ents if ent.label_ in ("GPE", "LOC")]
+    locations = []
+
+    for ent in doc.ents:
+        if ent.label_ in ("GPE", "LOC"):
+            loc = ent.text.strip()
+            # Expand if abbreviation exists
+            expanded = CITY_MAP.get(loc.lower(), loc)
+            locations.append(expanded)
+
+    return locations
 
 
 def extract_tool_output(result):

@@ -28,7 +28,7 @@ async def run_task_endpoint(goal: str = Query(..., description="Natural language
         return {"status": "error", "message": "No listings found."}
 
 @app.get("/search_redfin")
-async def search_redfin(location: str = Query(..., description="Location to scrape properties"), max_price: int = Query(..., description="Max price that the properties can have (leave blank for unlimited)") | None = None):
+async def search_redfin(location: str = Query(..., description="Location to scrape properties"), max_price: int = Query(None, description="Max price that the properties can have (leave blank for unlimited)")):
     listings = await scrape_redfin(location, max_price)
 
     if listings:

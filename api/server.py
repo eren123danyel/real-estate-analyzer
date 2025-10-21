@@ -1,13 +1,23 @@
 import uvicorn
 from fastapi import FastAPI, Query
-from ai.mcp_client import run_redfin_scraper
+from ai.mcp_client import run_redfin_scraper, get_mcp_server, shutdown_mcp
 from ai.utils import extract_locations
 from core.scraper import scrape_redfin, get_starting_url
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # On start up
+    await get_mcp_server()
+    yield
+    # On exit
+    await shutdown_mcp()
 
 app = FastAPI(
     title="Real Estate Rent Analyzer API",
     description="Playwright-powered property scraping and AI automation.",
     version="1.0.0",
+    lifespan=lifespan
 )
 
 @app.get("/search_redfin_with_ai")
@@ -37,5 +47,8 @@ async def search_redfin(location: str = Query(..., description="Location to scra
         return {"status": "error", "message": "No listings found."}
 
 
-if __name__ == "__main__":
+def main():
     uvicorn.run(app, host="127.0.0.1", port=8080)
+
+if __name__ == "__main__":
+    main()

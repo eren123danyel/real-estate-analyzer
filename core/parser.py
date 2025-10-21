@@ -1,5 +1,12 @@
 from bs4 import BeautifulSoup
 
+
+def has_digit(s: str):
+     '''Check if the string contains any digit.'''
+     return any(d if d.isdigit() else False for d in str(s))
+
+
+
 def parse_redfin_property(html_content: str, max_price: int | None = None):
     '''
     Extract property listings from a Redfin search results page.
@@ -38,7 +45,7 @@ def parse_redfin_property(html_content: str, max_price: int | None = None):
 
             # Sqft
             sqft_element = card.select_one("span.bp-Homecard__Stats--sqft .bp-Homecard__LockedStat--value")
-            sqft = sqft_element.get_text(strip=True) if sqft_element else "N/A"
+            sqft = sqft_element.get_text(strip=True) if sqft_element and has_digit(sqft_element) else "N/A"
 
             # Link
             link_element = card.select_one("a.bp-Homecard__Address")

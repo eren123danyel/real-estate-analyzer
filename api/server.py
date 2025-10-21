@@ -5,6 +5,10 @@ from ai.utils import extract_locations
 from core.scraper import scrape_redfin, get_starting_url
 from contextlib import asynccontextmanager
 
+# Get centralized logger
+import logging
+log = logging.getLogger(__name__)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # On start up

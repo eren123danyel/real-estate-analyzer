@@ -7,7 +7,7 @@
 
 An AI-powered tool that utilizes Playwright MCP to scrape, parse, and analyze real estate rental data for a given area.
 
-This repository contains an automated real estate rent analyzer that helps you gather and understand rental listings and neighborhood information through the power of AI.
+This repository contains an automated real estate rent analyzer that helps you gather and understand rental listings and neighborhood information through the power of AI. (Currently only works with Redfin)
 
 ## ✨ Features
 
@@ -96,16 +96,10 @@ The API will then be available at `http://127.0.0.1:8080`.
 Here are some examples of how to use the Real Estate Rent Analyzer.
 
 ### 🤖 CLI Demo
+![losangeles](https://github.com/user-attachments/assets/8d41cd17-95a6-4521-9040-5bd083ae698f)
+![NY](https://github.com/user-attachments/assets/fe31b90f-5c34-4ac7-a971-150e7b51d6be)
 
 
-```powershell
-
-```
-
-**Expected Output:**
-
-```powershell
-```
 
 ### 🔌 API Demo
 

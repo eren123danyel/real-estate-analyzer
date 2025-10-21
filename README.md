@@ -3,11 +3,11 @@
 
 # 🏠 Real Estate Rent Analyzer
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An AI-powered tool that utilizes Playwright MCP to scrape, parse, and analyze real estate rental data for a given area.
 
-This repository contains an automated real estate rent analyzer that helps you gather and understand rental listings and neighborhood information through the power of AI.
+This repository contains an automated real estate rent analyzer that helps you gather and understand rental listings and neighborhood information through the power of AI. (Currently only works with Redfin)
 
 ## ✨ Features
 
@@ -82,6 +82,22 @@ To get started directly from your terminal:
 python rentanalyzer.py --help
 ```
 
+#### Sample commands
+Find rentals in LA and print to terminal:
+```powershell
+python rentanalyzer.py -l "Los Angeles" 
+```
+
+Find rentals in New York City under 3k and save as CSV:
+```powershell
+python rentanalyzer.py -l "NYC" -m 3000 -o "output.csv" 
+```
+
+Find apartments that have 3 beds and are dog friendly in Seattle and save as CSV:
+```powershell
+python rentanalyzer.py -g "Find apartments in Seattle that have 3+ beds and that are dog friendly" -m 3000 -o "output.csv" 
+```
+
 ### As an API Server
 
 To start the FastAPI server:
@@ -95,25 +111,32 @@ The API will then be available at `http://127.0.0.1:8080`.
 
 Here are some examples of how to use the Real Estate Rent Analyzer.
 
-### 🤖 CLI Demo
+### 🖥️ CLI Demo w/o AI
+![losangeles](https://github.com/user-attachments/assets/8d41cd17-95a6-4521-9040-5bd083ae698f)
+![NY](https://github.com/user-attachments/assets/fe31b90f-5c34-4ac7-a971-150e7b51d6be)
 
+### 🤖 CLI Demo w/ AI
+![ai](https://github.com/user-attachments/assets/2b0dbb14-c340-43b6-ab30-4a7666bd3592)
 
-```powershell
-
-```
-
-**Expected Output:**
-
-```powershell
-```
 
 ### 🔌 API Demo
 
-Once the server is running, you can interact with the API. Here’s an example using `curl`:
+Once the server is running, you can interact with the API via Swagger UI by going to: (http://127.0.0.1:8080/docs/). 
+<img width="1000" alt="image of Swagger UI" src="https://github.com/user-attachments/assets/3bd66498-23e0-4641-9f3f-53008361d4b7" />
+<img width="1000" alt="image of sucessfull request" src="https://github.com/user-attachments/assets/a7598b66-8a8e-4222-a7a0-c554f303fc5c" />
+
+You can also make requests using curl, for example:
 
 ```powershell
-
+curl.exe -X GET "http://127.0.0.1:8080/search_redfin?location=Seattle" -H "accept: application/json"
 ```
+
+or
+
+```powershell
+curl.exe -X GET "http://127.0.0.1:8080/search_redfin_with_ai?goal=Find%20rental%20listings%20under%203000%20in%20Los%20Angeles" -H "accept: application/json"
+```
+
 
 ## 📄 License
 

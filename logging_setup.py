@@ -1,4 +1,5 @@
-import sys, logging
+import sys
+import logging
 from logging.handlers import RotatingFileHandler
 from colorlog import ColoredFormatter
 

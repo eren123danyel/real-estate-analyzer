@@ -106,7 +106,7 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
         log.info(f"⏭️ Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}")
 
         with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):            
-            log.debug(f"📋 Search Criteria:", user_criteria)
+            log.debug("📋 Search Criteria:", user_criteria)
             log.debug(f"🌐 Starting URL: {start_url}")
             
             # Phase 1: Navigate and apply filters
@@ -118,7 +118,7 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
                 max_turns=15,
             )
             
-            log.info(f"✅ Navigation complete")
+            log.info("✅ Navigation complete")
 
             # Check if filters were applied
             if "FILTERS_APPLIED" not in nav_result.final_output:

@@ -4,5 +4,4 @@ playwright
 beautifulsoup4
 openai-agents
 python-dotenv
-json
 spacy

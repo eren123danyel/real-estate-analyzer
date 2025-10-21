@@ -121,11 +121,22 @@ Here are some examples of how to use the Real Estate Rent Analyzer.
 
 ### 🔌 API Demo
 
-Once the server is running, you can interact with the API. Here’s an example using `curl`:
+Once the server is running, you can interact with the API via Swagger UI by going to: (http://127.0.0.1:8080/docs/). 
+<img width="1000" alt="image of Swagger UI" src="https://github.com/user-attachments/assets/3bd66498-23e0-4641-9f3f-53008361d4b7" />
+<img width="1000" alt="image of sucessfull request" src="https://github.com/user-attachments/assets/a7598b66-8a8e-4222-a7a0-c554f303fc5c" />
+
+You can also make requests using curl, for example:
 
 ```powershell
-
+curl.exe -X GET "http://127.0.0.1:8080/search_redfin?location=Seattle" -H "accept: application/json"
 ```
+
+or
+
+```powershell
+curl.exe -X GET "http://127.0.0.1:8080/search_redfin_with_ai?goal=Find%20rental%20listings%20under%203000%20in%20Los%20Angeles" -H "accept: application/json"
+```
+
 
 ## 📄 License
 

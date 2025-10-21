@@ -3,7 +3,7 @@
 
 # 🏠 Real Estate Rent Analyzer
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/eren123danyel/real-estate-analyzer/edit/main/README.md?tab=MIT-1-ov-file)
 
 An AI-powered tool that utilizes Playwright MCP to scrape, parse, and analyze real estate rental data for a given area.
 

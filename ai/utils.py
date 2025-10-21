@@ -23,11 +23,11 @@ def extract_locations(text: str):
     locations = []
 
     for ent in doc.ents:
-        if ent.label_ in ("GPE", "LOC"):
+        if CITY_MAP.get(ent.text.lower()):
+            locations.append(CITY_MAP[ent.text.lower()])
+        elif ent.label_ in ("GPE", "LOC"):
             loc = ent.text.strip()
-            # Expand if abbreviation exists
-            expanded = CITY_MAP.get(loc.lower(), loc)
-            locations.append(expanded)
+            locations.append(loc)
 
     return locations
 

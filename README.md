@@ -109,7 +109,7 @@ The API will then be available at `http://127.0.0.1:8080`.
 
 Two endpoints will be made available:
  - /search_redfin_with_ai
-	 - Takes paramater *goal* in natural language, which lets the AI know what to scrape.
+	 - Takes parameter *goal* in natural language, which lets the AI know what to scrape.
  - /search_redfin
 	 - Takes *location* and optionally *max_price*.
 
@@ -130,7 +130,7 @@ Here are some examples of how to use the Real Estate Rent Analyzer.
 
 Once the server is running, you can interact with the API via Swagger UI by going to: (http://127.0.0.1:8080/docs/). 
 <img width="1000" alt="image of Swagger UI" src="https://github.com/user-attachments/assets/3bd66498-23e0-4641-9f3f-53008361d4b7" />
-<img width="1000" alt="image of sucessfull request" src="https://github.com/user-attachments/assets/a7598b66-8a8e-4222-a7a0-c554f303fc5c" />
+<img width="1000" alt="image of successful request" src="https://github.com/user-attachments/assets/a7598b66-8a8e-4222-a7a0-c554f303fc5c" />
 
 You can also make requests using curl, for example:
 

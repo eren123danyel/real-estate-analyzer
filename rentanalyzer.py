@@ -31,7 +31,7 @@ parser.add_argument(
     "--max_price",
     type=int,
     default=None,
-    help="Maximum rental price to filter properties",
+    help="Maximum rental price to filter properties (works in conjunction with -l)",
 )
 
 parser.add_argument(
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         from dotenv import dotenv_values
         import asyncio
 
-        # Define main seperatly so we can run asyncio
+        # Define main separately so we can run asyncio
         async def main():
             # If the is no OPENAI_API_KEY in .env, return an error
             if not dotenv_values(".env")["OPENAI_API_KEY"]:
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             # Try to extract location from the goal
             location = extract_locations(args.goal)
 
-            # If we couldnt find the location, return an error
+            # If we couldn't find the location, return an error
             if not location:
                 log.error(
                     "❌ Could not extract location from the input. Please specify a valid location in user goal."
@@ -122,7 +122,7 @@ if __name__ == "__main__":
                             f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}"
                         )
 
-        # Run main asynchrounsly
+        # Run main asynchronously
         asyncio.run(main())
 
     # If the -l flag is specified
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         from core.scraper import scrape_redfin
         import asyncio
 
-        # Define main seperatly so we can run asyncio
+        # Define main separately so we can run asyncio
         async def main():
             # Manually scrape listings
             listings = await scrape_redfin(args.location, args.max_price)
@@ -164,5 +164,7 @@ if __name__ == "__main__":
                     )
 
         asyncio.run(main())
+    elif args.max_price:
+        log.info("Need to use with -l flag")
     else:
-        log.info("No arguments specified")
+        log.info("Need to pass arguments!")

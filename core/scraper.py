@@ -44,7 +44,7 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             # Switch to "Rent" section
             await page.locator('span[data-text="Rent"]').click()
 
-            # Searh for the location
+            # Search for the location
             search_box_placeholder = "City, Address, School, Building, ZIP"
             await page.wait_for_selector("input#search-box-input", timeout=10000)
             await page.get_by_placeholder(search_box_placeholder).click(timeout=10000)
@@ -103,7 +103,7 @@ async def get_starting_url(location: str):
             # Switch to "Rent" section
             await page.locator('span[data-text="Rent"]').click()
 
-            # Searh for the location
+            # Search for the location
             search_box_placeholder = "City, Address, School, Building, ZIP"
             await page.wait_for_selector("input#search-box-input", timeout=10000)
             await page.get_by_placeholder(search_box_placeholder).click(timeout=10000)

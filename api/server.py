@@ -4,6 +4,7 @@ from ai.mcp_client import run_redfin_scraper, get_mcp_server, shutdown_mcp
 from ai.utils import extract_locations
 from core.scraper import scrape_redfin, get_starting_url
 from contextlib import asynccontextmanager
+from dotenv import dotenv_values
 
 # Get centralized logger
 import logging
@@ -35,10 +36,17 @@ async def run_task_endpoint(
         description="Natural language goal, e.g. 'Find rent under 3000 in Los Angeles'",
     ),
 ):
+    # Check if the OPENAI_API_KEY is specified
+    if not dotenv_values(".env")["OPENAI_API_KEY"]:
+        return {
+            "status": "error",
+            "message": "Could not find OPENAI_API_KEY in .env",
+        }
+         
     # Get the location from the goal
     location = extract_locations(goal)
 
-    # If we cant find the location in the string we want to return an error
+    # If we can't find the location in the string we want to return an error
     if not location:
         return {
             "status": "error",

@@ -107,6 +107,13 @@ python rentanalyzer.py -api
 ```
 The API will then be available at `http://127.0.0.1:8080`.
 
+Two endpoints will be made available:
+ - /search_redfin_with_ai
+	 - Takes paramater *goal* in natural language, which lets the AI know what to scrape.
+ - /search_redfin
+	 - Takes *location* and optionally *max_price*.
+
+
 ## 🎬 Demos
 
 Here are some examples of how to use the Real Estate Rent Analyzer.

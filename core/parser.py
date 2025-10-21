@@ -25,10 +25,10 @@ def parse_redfin_property(html_content: str, max_price: int | None = None):
             # Filter by max_price if provided
             if max_price and price != "N/A":
                 # Only keep digits from price string and convert to int
-                int_price = int("".join(filter(str.isdigit,price)))
+                int_price = int("".join(filter(str.isdigit, price))) if any(ch.isdigit() for ch in price) else None
                 
                 # Skip if price exceeds max_price
-                if int_price > max_price:
+                if int_price & (int_price > max_price):
                     continue
             
             # Address

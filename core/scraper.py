@@ -1,5 +1,6 @@
 from playwright.async_api import async_playwright
 from core.parser import parse_redfin_property
+from ai.utils import extract_locations
 
 # Get centralized logger
 import logging
@@ -8,8 +9,13 @@ async def scrape_redfin(location: str, max_price: int | None = None):
     '''
     Scrape redfin for real estate listings in the given location.
     '''
-
-    log.info(f"🕷️ Crawling Redfin for location: {location}",end='\n')
+    try:
+        location = extract_locations(location)[0]
+    except Exception as e:
+        log.error("⚠️ Invalid location!",e)
+        return
+    
+    log.info(f"🕷️ Crawling Redfin for location: {location}")
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True,slow_mo=100)
@@ -44,7 +50,7 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             await page.wait_for_load_state("networkidle")
 
             
-            log.info(f"➡️  Navigated to search results page for {location}", end='\n')
+            log.info(f"➡️  Navigated to search results page for {location}")
 
             # Wait for the listings to load
             await page.wait_for_selector("div.HomeCardContainer",timeout=20000)
@@ -52,11 +58,16 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             # Get HTML content of the page
             html_content = await page.content()
             properties = parse_redfin_property(html_content, max_price)
-            log.info(f"✅ Scraped {len(properties)} properties from Redfin", end='\n')
+            log.info(f"✅ Scraped {len(properties)} properties from Redfin")
 
         except Exception as e:
-            log.warning(f"⚠️  Scraper error: {e}",end='\n')
+            if "ERR_NAME_NOT_RESOLVED" in str(e):
+                    log.error("⚠️  Network error: Unable to resolve domain. Please check your internet connection.")
+                    return
+            else:
+                    log.warning(f"⚠️  Scraper error: {e}")
             raise e
+
 
         finally:
             await browser.close()
@@ -106,7 +117,11 @@ async def get_starting_url(location: str):
            
 
         except Exception as e:
-            log.warning(f"⚠️  Scraper error: {e}",end='\n')
+            if "ERR_NAME_NOT_RESOLVED" in str(e):
+                    log.error("⚠️  Network error: Unable to resolve domain. Please check your internet connection.")
+                    return
+            else:
+                    log.warning(f"⚠️  Scraper error: {e}")
             raise e
 
         finally:

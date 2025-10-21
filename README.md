@@ -82,7 +82,7 @@ To get started directly from your terminal:
 python rentanalyzer.py --help
 ```
 
-# Sample commands
+#### Sample commands
 Find rentals in LA and print to terminal:
 ```powershell
 python rentanalyzer.py -l "Los Angeles" 
@@ -93,9 +93,9 @@ Find rentals in New York City under 3k and save as CSV:
 python rentanalyzer.py -l "NYC" -m 3000 -o "output.csv" 
 ```
 
-Find apartments that have 3 beds and are dog friendly in Seatlle and save as CSV:
+Find apartments that have 3 beds and are dog friendly in Seattle and save as CSV:
 ```powershell
-python rentanalyzer.py -g "Find apartments in Seatlle that have 3+ beds and that are dog friendly" -m 3000 -o "output.csv" 
+python rentanalyzer.py -g "Find apartments in Seattle that have 3+ beds and that are dog friendly" -m 3000 -o "output.csv" 
 ```
 
 ### As an API Server

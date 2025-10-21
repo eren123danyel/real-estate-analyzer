@@ -1,8 +1,8 @@
-fastapi
-uvicorn
-playwright
-beautifulsoup4
-openai-agents
-python-dotenv
-spacy
-colorlog
+fastapi==0.119.0
+uvicorn==0.37.0
+playwright==1.55.0
+beautifulsoup4==4.14.2
+openai-agents==0.4.0
+python-dotenv==1.1.1
+spacy==3.8.7
+colorlog==6.10.1

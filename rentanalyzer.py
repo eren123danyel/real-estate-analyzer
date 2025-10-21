@@ -16,10 +16,8 @@ parser.add_argument("-l","--location", type=str, default=None,
 parser.add_argument("-m","--max_price", type=int, default=None,
                     help="Maximum rental price to filter properties")
 
-parser.add_argument("-ai","--use_ai", action="store_true", help="Use AI-powered scraping for enhanced results with playwright MCP server that allows user to specify specifc criteria like (Must use --goal flag and have OPENAI_API_KEY set in .env)")
-
 parser.add_argument("-g","--goal", type=str, default=None,
-                    help="Natural language goal for AI-powered scraping (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA')")
+                    help="Use AI-powered scraping for Natural language goal with Playwright MCP server (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA') (Use by itself, must have OPENAI_API_KEY set in .env)")
 
 parser.add_argument("-api","--server-api", action="store_true", help="Host Fast API endpoint for external access (Will ignore other flags)")
 
@@ -32,7 +30,7 @@ if __name__ == "__main__":
         from api.server import main
         main()
 
-    elif args.use_ai:
+    elif args.goal:
         from ai.mcp_client import run_scraper_with_shutdown, get_starting_url
         from ai.utils import extract_locations
         from dotenv import dotenv_values
@@ -42,10 +40,6 @@ if __name__ == "__main__":
             if not dotenv_values(".env")["OPENAI_API_KEY"]:
                 log.error("❌ OPENAI_API_KEY not set in .env file. Please set it to use AI-powered scraping.")
                 return
-            
-            if not args.goal:
-                log.error("❌ Please provide a natural language goal using the --goal flag for AI-powered scraping.")
-                return
 
             location = extract_locations(args.goal)
 
@@ -53,15 +47,7 @@ if __name__ == "__main__":
                 log.error("❌ Could not extract location from the input. Please specify a valid location in user goal.")
                 return
             
-            try:
-                start_url = await get_starting_url(location[0])
-            except Exception as e:
-                if "ERR_NAME_NOT_RESOLVED" in str(e):
-                    log.error("⚠️  Network error: Unable to resolve domain. Please check your internet connection.")
-                    return
-                else:
-                    log.error("Please ensure the location is valid and try again.")
-                    return
+            start_url = await get_starting_url(location[0])
 
             listings = await run_scraper_with_shutdown(args.goal, start_url)
 

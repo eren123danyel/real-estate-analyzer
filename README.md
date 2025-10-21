@@ -82,6 +82,22 @@ To get started directly from your terminal:
 python rentanalyzer.py --help
 ```
 
+# Sample commands
+Find rentals in LA and print to terminal:
+```powershell
+python rentanalyzer.py -l "Los Angeles" 
+```
+
+Find rentals in New York City under 3k and save as CSV:
+```powershell
+python rentanalyzer.py -l "NYC" -m 3000 -o "output.csv" 
+```
+
+Find apartments that have 3 beds and are dog friendly in Seatlle and save as CSV:
+```powershell
+python rentanalyzer.py -g "Find apartments in Seatlle that have 3+ beds and that are dog friendly" -m 3000 -o "output.csv" 
+```
+
 ### As an API Server
 
 To start the FastAPI server:
@@ -95,10 +111,12 @@ The API will then be available at `http://127.0.0.1:8080`.
 
 Here are some examples of how to use the Real Estate Rent Analyzer.
 
-### 🤖 CLI Demo
+### 🖥️ CLI Demo w/o AI
 ![losangeles](https://github.com/user-attachments/assets/8d41cd17-95a6-4521-9040-5bd083ae698f)
 ![NY](https://github.com/user-attachments/assets/fe31b90f-5c34-4ac7-a971-150e7b51d6be)
 
+### 🤖 CLI Demo w/ AI
+![ai](https://github.com/user-attachments/assets/2b0dbb14-c340-43b6-ab30-4a7666bd3592)
 
 
 ### 🔌 API Demo

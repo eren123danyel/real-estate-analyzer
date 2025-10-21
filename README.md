@@ -8,12 +8,12 @@
 
 An AI-powered tool that utilizes Playwright MCP to scrape, parse, and analyze real estate rental data for a given area.
 
-This repository contains an automated real estate rent analyzer that helps you gather and understand rental listings and neighborhood information through the power of AI. (Currently only works with Redfin)
+This repository contains an automated real estate rent analyzer that helps you gather rental listings in specific area based on user criteria. (Currently only works with Redfin)
 
 ## ✨ Features
 
 *   **Automated Web Scraping:** Extracts real estate listings from the web using Playwright.
-*   **Intelligent Content Parsing:** Structures the scraped data for analysis.
+*   **Intelligent Content Parsing:** Structures the scraped data for analysis directly to the terminal or saves it as a CSV file.
 *   **AI-Powered Filtering:** Leverages AI and Playwright MCP to apply filters based on user criteria. 
 *   **Dual Interface:** Can be run as a command-line tool for direct analysis or as a FastAPI server for API access.
 
@@ -94,9 +94,9 @@ Find rentals in New York City under 3k and save as CSV:
 python rentanalyzer.py -l "NYC" -m 3000 -o "output.csv" 
 ```
 
-Find apartments that have 3 beds and are dog friendly in Seattle and save as CSV:
+Find apartments under $3k that have 2+ beds and are dog friendly in Seattle and save as CSV:
 ```powershell
-python rentanalyzer.py -g "Find apartments in Seattle that have 3+ beds and that are dog friendly" -m 3000 -o "output.csv" 
+python rentanalyzer.py -g "Find apartments in Seattle that have 2+ beds and that are dog friendly and under $3k" -o "output.csv" 
 ```
 
 ### As an API Server
@@ -108,7 +108,7 @@ python rentanalyzer.py -api
 ```
 The API will then be available at `http://127.0.0.1:8080`.
 
-Two endpoints will be made available:
+When run as a server, two endpoints will be made available:
  - /search_redfin_with_ai
 	 - Takes parameter *goal* in natural language, which lets the AI know what to scrape.
  - /search_redfin

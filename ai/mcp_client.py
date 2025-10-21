@@ -11,11 +11,13 @@ from ai.utils import extract_tool_output, extract_locations
 
 # Get centralized logger
 import logging
+
 log = logging.getLogger(__name__)
 
 # Load API key
 os.environ["OPENAI_API_KEY"] = dotenv_values(".env")["OPENAI_API_KEY"]
 mcp_instance = None  # Global MCP server instance
+
 
 async def get_mcp_server():
     """
@@ -23,13 +25,11 @@ async def get_mcp_server():
     Use this in an async with block.
     """
 
-    
     userAgent = (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
     )
-    
 
     global mcp_instance
     if mcp_instance is None:
@@ -42,16 +42,19 @@ async def get_mcp_server():
                 "args": [
                     "@playwright/mcp@latest",
                     "--headless",
-                    "--viewport-size", "1280,800",
-                    "--user-agent", userAgent
-                    ],
+                    "--viewport-size",
+                    "1280,800",
+                    "--user-agent",
+                    userAgent,
+                ],
             },
             cache_tools_list=False,
-            client_session_timeout_seconds=120
+            client_session_timeout_seconds=120,
         )
         await mcp_instance.__aenter__()  # Start it once
         log.info("🏃 MCP server is running.")
     return mcp_instance
+
 
 async def shutdown_mcp():
     global mcp_instance
@@ -64,12 +67,11 @@ async def shutdown_mcp():
 async def run_redfin_scraper(user_criteria: str, start_url: str):
     """
     Main function to scrape Redfin based on user criteria.
-    
+
     Args:
         user_criteria: String describing user criteria for filtering properties
         start_url: Starting Redfin URL
     """
-
 
     mcp = await get_mcp_server()
 
@@ -99,65 +101,79 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
             Use any MCP browser tools as needed to accomplish this.
 
             Stop tool use immediately after filters are applied.
-            """
+            """,
         )
 
         trace_id = gen_trace_id()
-        log.info(f"⏭️ Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}")
+        log.info(
+            f"⏭️ Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}"
+        )
 
-        with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):            
+        with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):
             log.debug("📋 Search Criteria:", user_criteria)
             log.debug(f"🌐 Starting URL: {start_url}")
-            
+
             # Phase 1: Navigate and apply filters
             log.info("🔍 Navigating and applying filters...")
-            
+
             nav_result = await Runner.run(
                 starting_agent=navigator,
                 input=f"Navigate to {start_url} and apply the filters from the user criteria.",
                 max_turns=15,
             )
-            
+
             log.info("✅ Navigation complete")
 
             # Check if filters were applied
             if "FILTERS_APPLIED" not in nav_result.final_output:
-                log.warning("⚠️ Warning: Filters may not have been fully applied. Continuing anyway...")
+                log.warning(
+                    "⚠️ Warning: Filters may not have been fully applied. Continuing anyway..."
+                )
             log.info("Scraping property listings...")
 
             # Phase 2: Get HTML and scrape property listings
-            html_result = await mcp.call_tool("browser_evaluate", {
-                "function": """async () => {
+            html_result = await mcp.call_tool(
+                "browser_evaluate",
+                {
+                    "function": """async () => {
                 document.querySelectorAll('script, style').forEach(el => el.remove());
                 return document.documentElement.outerHTML;
                 }"""
-            })
+                },
+            )
 
             html = extract_tool_output(html_result)
-        
+
             properties = parse_redfin_property(html)
 
             return properties
     except Exception as e:
         log.warning(f"⚠️  Scraper error: {e}")
         raise e
+
+
 async def run_scraper_with_shutdown(user_goal, start_url):
-        '''Ensure they are on the same thread'''
-        result = ""
-        try:
-            result = await run_redfin_scraper(user_goal, start_url)
-        except asyncio.CancelledError:
-            raise
-        finally:
-            await shutdown_mcp()
-            return result
-            
+    """Ensure they are on the same thread"""
+    result = ""
+    try:
+        result = await run_redfin_scraper(user_goal, start_url)
+    except asyncio.CancelledError:
+        raise
+    finally:
+        await shutdown_mcp()
+        return result
+
+
 if __name__ == "__main__":
-    user_goal = input("Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA'): ").strip()
-    user_goal = user_goal if user_goal else "Collect all rental listings under $2500 with ≥2 beds and ≥1 bath in Seattle."
+    user_goal = input(
+        "Enter your property search goal (e.g., 'Find 2-bedroom apartments under $2500 in Seattle, WA'): "
+    ).strip()
+    user_goal = (
+        user_goal
+        if user_goal
+        else "Collect all rental listings under $2500 with ≥2 beds and ≥1 bath in Seattle."
+    )
     location = extract_locations(user_goal)
     start_url = asyncio.run(get_starting_url(location[0]))
 
-    
-
-    asyncio.run(run_scraper_with_shutdown(user_goal,start_url))
+    asyncio.run(run_scraper_with_shutdown(user_goal, start_url))

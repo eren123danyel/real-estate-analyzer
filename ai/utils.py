@@ -15,6 +15,8 @@ CITY_MAP = {
     "vegas": "Las Vegas",
     "sd": "San Diego",
 }
+
+
 def extract_locations(text: str):
     """
     Extracts location from the given string using spaCy NLP.
@@ -48,7 +50,7 @@ def extract_tool_output(result):
             text_data = block.text
 
             if isinstance(text_data, str) and text_data.startswith("### Result"):
-                lines = text_data.split('\n', 1)
+                lines = text_data.split("\n", 1)
                 if len(lines) > 1:
                     raw = lines[1].strip()
                     try:

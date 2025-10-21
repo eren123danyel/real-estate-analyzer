@@ -1,14 +1,15 @@
-import asyncio
 from playwright.async_api import async_playwright
 from core.parser import parse_redfin_property
 
-
+# Get centralized logger
+import logging
+log = logging.getLogger(__name__)
 async def scrape_redfin(location: str, max_price: int | None = None):
     '''
     Scrape redfin for real estate listings in the given location.
     '''
 
-    print(f"🔍 Scraping Redfin for location: {location}",end='\n')
+    log.info(f"🕷️ Crawling Redfin for location: {location}",end='\n')
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True,slow_mo=100)
@@ -43,7 +44,7 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             await page.wait_for_load_state("networkidle")
 
             
-            print(f"➡️  Navigated to search results page for {location}", end='\n')
+            log.info(f"➡️  Navigated to search results page for {location}", end='\n')
 
             # Wait for the listings to load
             await page.wait_for_selector("div.HomeCardContainer",timeout=20000)
@@ -51,10 +52,10 @@ async def scrape_redfin(location: str, max_price: int | None = None):
             # Get HTML content of the page
             html_content = await page.content()
             properties = parse_redfin_property(html_content, max_price)
-            print(f"✅ Scraped {len(properties)} properties from Redfin", end='\n')
+            log.info(f"✅ Scraped {len(properties)} properties from Redfin", end='\n')
 
         except Exception as e:
-            print(f"⚠️  Scraper error: {e}",end='\n')
+            log.warning(f"⚠️  Scraper error: {e}",end='\n')
             raise e
 
         finally:
@@ -105,7 +106,7 @@ async def get_starting_url(location: str):
            
 
         except Exception as e:
-            print(f"⚠️  Scraper error: {e}",end='\n')
+            log.warning(f"⚠️  Scraper error: {e}",end='\n')
             raise e
 
         finally:

@@ -8,6 +8,11 @@ from core.parser import parse_redfin_property
 from core.scraper import get_starting_url
 from ai.utils import extract_tool_output, extract_locations
 
+
+# Get centralized logger
+import logging
+log = logging.getLogger(__name__)
+
 # Load API key
 os.environ["OPENAI_API_KEY"] = dotenv_values(".env")["OPENAI_API_KEY"]
 mcp_instance = None  # Global MCP server instance
@@ -28,7 +33,7 @@ async def get_mcp_server():
 
     global mcp_instance
     if mcp_instance is None:
-        print("🚀 Launching global MCP server...", end="\n")
+        log.info("🚀 Launching global MCP server...")
 
         mcp_instance = MCPServerStdio(
             name="Playwright",
@@ -45,13 +50,13 @@ async def get_mcp_server():
             client_session_timeout_seconds=120
         )
         await mcp_instance.__aenter__()  # Start it once
-        print("🏃 MCP server is running.",end="\n")
+        log.info("🏃 MCP server is running.")
     return mcp_instance
 
 async def shutdown_mcp():
     global mcp_instance
     if mcp_instance:
-        print("🧹 Shutting down MCP server...")
+        log.info("🧹 Shutting down MCP server...")
         await mcp_instance.__aexit__(None, None, None)
         mcp_instance = None
 
@@ -98,15 +103,14 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
         )
 
         trace_id = gen_trace_id()
-        print(f"🔍 Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}", end="\n")
+        log.info(f"⏭️ Trace URL: https://platform.openai.com/traces/trace?trace_id={trace_id}")
 
         with trace(workflow_name="RedfinPropertyScraper", trace_id=trace_id):            
-            print(f"📋 Search Criteria:", user_criteria, end="\n")
-            print(f"🌐 Starting URL: {start_url}", end="\n")
+            log.debug(f"📋 Search Criteria:", user_criteria)
+            log.debug(f"🌐 Starting URL: {start_url}")
             
             # Phase 1: Navigate and apply filters
-            print("Phase 1: Navigating and applying filters...", end="\n")
-            print("-" * 60, end="\n")
+            log.info("🔍 Navigating and applying filters...")
             
             nav_result = await Runner.run(
                 starting_agent=navigator,
@@ -114,13 +118,12 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
                 max_turns=15,
             )
             
-            print(f"\n✅ Navigation complete: {nav_result.final_output}\n")
+            log.info(f"✅ Navigation complete")
 
             # Check if filters were applied
             if "FILTERS_APPLIED" not in nav_result.final_output:
-                print("⚠️ Warning: Filters may not have been fully applied. Continuing anyway...")
-            print("Phase 2: Scraping property listings...", end="\n")
-            print("-" * 60, end="\n")
+                log.warning("⚠️ Warning: Filters may not have been fully applied. Continuing anyway...")
+            log.info("Scraping property listings...")
 
             # Phase 2: Get HTML and scrape property listings
             html_result = await mcp.call_tool("browser_evaluate", {
@@ -136,7 +139,7 @@ async def run_redfin_scraper(user_criteria: str, start_url: str):
 
             return properties
     except Exception as e:
-        print(f"⚠️  Scraper error: {e}", end="\n")
+        log.warning(f"⚠️  Scraper error: {e}")
         raise e
 async def run_scraper_with_shutdown(user_goal, start_url):
         '''Ensure they are on the same thread'''

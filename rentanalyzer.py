@@ -1,4 +1,9 @@
 import argparse
+from logging_setup import setup_logging
+import logging
+
+setup_logging()
+log = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description="Analyze rental prices in a given area.")
 
@@ -35,35 +40,35 @@ if __name__ == "__main__":
 
         async def main():
             if not dotenv_values(".env")["OPENAI_API_KEY"]:
-                print("❌ OPENAI_API_KEY not set in .env file. Please set it to use AI-powered scraping.", end="\n")
+                log.error("❌ OPENAI_API_KEY not set in .env file. Please set it to use AI-powered scraping.")
                 return
             
             if not args.goal:
-                print("❌ Please provide a natural language goal using the --goal flag for AI-powered scraping.", end="\n")
+                log.error("❌ Please provide a natural language goal using the --goal flag for AI-powered scraping.")
                 return
 
             location = extract_locations(args.goal)
 
             if not location:
-                print("❌ Could not extract location from the input. Please specify a valid location in user goal.",end='\n')
+                log.error("❌ Could not extract location from the input. Please specify a valid location in user goal.")
                 return
             
             try:
                 start_url = await get_starting_url(location[0])
             except Exception as e:
                 if "ERR_NAME_NOT_RESOLVED" in str(e):
-                    print("⚠️  Network error: Unable to resolve domain. Please check your internet connection.", end="\n")
+                    log.error("⚠️  Network error: Unable to resolve domain. Please check your internet connection.")
                     return
                 else:
-                    print("Please ensure the location is valid and try again.", end="\n")
+                    log.error("Please ensure the location is valid and try again.")
                     return
 
             listings = await run_scraper_with_shutdown(args.goal, start_url)
 
             if not listings:
-                print("❌ No properties found matching the criteria.", end="\n")
+                log.error("❌ No properties found matching the criteria.")
             else:
-                print(f"✅ Found {len(listings)} properties matching criteria.", end="\n")
+                log.info(f"✅ Found {len(listings)} properties matching criteria.")
                 if args.output:
                     import csv
                     keys = listings[0].keys()
@@ -71,10 +76,10 @@ if __name__ == "__main__":
                         dict_writer = csv.DictWriter(output_file, fieldnames=keys)
                         dict_writer.writeheader()
                         dict_writer.writerows(listings)
-                    print(f"✅ Listings saved to {args.output}", end='\n')
+                    log.info(f"✅ Listings saved to {args.output}")
                 else:
                     for idx, listing in enumerate(listings, start=1):
-                        print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}",end='\n')
+                        print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}")
                     
 
         asyncio.run(main())
@@ -87,10 +92,10 @@ if __name__ == "__main__":
             listings = await scrape_redfin(args.location, args.max_price)
 
             if not listings:
-                print("❌ No listings found.",end='\n')
+                log.error("❌ No listings found.")
                 return
             
-            print(f'✅ Found {len(listings)} listings:',end='\n')
+            log.info(f'✅ Found {len(listings)} listings:')
 
             if args.output:
                 import csv
@@ -99,9 +104,9 @@ if __name__ == "__main__":
                     dict_writer = csv.DictWriter(output_file, fieldnames=keys)
                     dict_writer.writeheader()
                     dict_writer.writerows(listings)
-                print(f"✅ Listings saved to {args.output}", end='\n')
+                log.info(f"💾 Listings saved to {args.output}", )
             else:
                 for idx, listing in enumerate(listings, start=1):
-                    print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}",end='\n')
+                    print(f"{idx}. {listing['address']} - {listing['price']} - {listing['beds']} beds - {listing['baths']} baths - link: {listing['link']}")
 
         asyncio.run(main())
